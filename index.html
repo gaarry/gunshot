@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="AR 手势射击游戏 - 使用手枪手势瞄准射击飞盘">
+    <meta name="theme-color" content="#0a0a1a">
+    <title>AR 手势射击游戏 | AR Gesture Shooter</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Three.js ES Module Import Map -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+        }
+    }
+    </script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-logo">
+            <div class="logo-ring"></div>
+            <div class="logo-ring"></div>
+            <div class="logo-ring"></div>
+            <span class="logo-text">AR</span>
+        </div>
+        <div class="loading-title">GESTURE SHOOTER</div>
+        <div class="loading-subtitle">手势射击游戏</div>
+        <div class="loading-container">
+            <div class="loading-bar" id="loading-bar"></div>
+            <div class="loading-glow"></div>
+        </div>
+        <div class="loading-text" id="loading-text">初始化系统...</div>
+        <div class="loading-steps">
+            <div class="step" id="step-1"><span class="step-icon">◇</span> 加载引擎</div>
+            <div class="step" id="step-2"><span class="step-icon">◇</span> 手势模型</div>
+            <div class="step" id="step-3"><span class="step-icon">◇</span> 摄像头</div>
+            <div class="step" id="step-4"><span class="step-icon">◇</span> 系统就绪</div>
+        </div>
+        <div class="loading-hint">
+            <div class="hint-item">🔫 做出"手枪"手势开始游戏</div>
+            <div class="hint-item">👆 食指瞄准目标</div>
+            <div class="hint-item">👍 大拇指扣动触发射击</div>
+        </div>
+    </div>
+    
+    <!-- Video Feed -->
+    <video id="video" autoplay playsinline></video>
+    
+    <!-- Hand Skeleton Canvas -->
+    <canvas id="skeleton-canvas"></canvas>
+    
+    <!-- Three.js Canvas -->
+    <canvas id="game-canvas"></canvas>
+    
+    <!-- Debug Panel -->
+    <div class="debug-panel" id="debug-panel">
+        <div class="debug-title">🔍 DEBUG</div>
+        <div class="debug-item">
+            <span class="debug-label">手部检测:</span>
+            <span class="debug-value" id="debug-hand">--</span>
+        </div>
+        <div class="debug-item">
+            <span class="debug-label">食指伸直:</span>
+            <span class="debug-value" id="debug-index">--</span>
+        </div>
+        <div class="debug-item">
+            <span class="debug-label">其他手指:</span>
+            <span class="debug-value" id="debug-others">--</span>
+        </div>
+        <div class="debug-item">
+            <span class="debug-label">手枪手势:</span>
+            <span class="debug-value" id="debug-gun">--</span>
+        </div>
+        <div class="debug-item">
+            <span class="debug-label">大拇指:</span>
+            <span class="debug-value" id="debug-thumb">--</span>
+        </div>
+    </div>
+    
+    <!-- HUD -->
+    <div class="hud hud-top-left">
+        <div class="panel score-panel">
+            <div class="panel-header">
+                <span class="panel-icon">◈</span>
+                <span class="panel-title">SCORE</span>
+            </div>
+            <div class="panel-value" id="score">0</div>
+        </div>
+    </div>
+    
+    <div class="hud hud-top-right">
+        <div class="panel combo-panel">
+            <div class="panel-header">
+                <span class="panel-icon">◈</span>
+                <span class="panel-title">COMBO</span>
+            </div>
+            <div class="panel-value" id="combo">x1</div>
+        </div>
+        <div class="panel accuracy-panel">
+            <div class="panel-header">
+                <span class="panel-icon">◈</span>
+                <span class="panel-title">ACCURACY</span>
+            </div>
+            <div class="panel-value" id="accuracy">100%</div>
+        </div>
+    </div>
+    
+    <!-- Crosshair -->
+    <div class="crosshair" id="crosshair">
+        <svg viewBox="0 0 100 100" class="crosshair-svg">
+            <circle cx="50" cy="50" r="45" class="crosshair-ring-outer"/>
+            <circle cx="50" cy="50" r="30" class="crosshair-ring-inner"/>
+            <circle cx="50" cy="50" r="3" class="crosshair-dot"/>
+            <line x1="50" y1="5" x2="50" y2="20" class="crosshair-line"/>
+            <line x1="50" y1="80" x2="50" y2="95" class="crosshair-line"/>
+            <line x1="5" y1="50" x2="20" y2="50" class="crosshair-line"/>
+            <line x1="80" y1="50" x2="95" y2="50" class="crosshair-line"/>
+            <!-- Corner brackets -->
+            <path d="M15,30 L15,15 L30,15" class="crosshair-bracket"/>
+            <path d="M70,15 L85,15 L85,30" class="crosshair-bracket"/>
+            <path d="M85,70 L85,85 L70,85" class="crosshair-bracket"/>
+            <path d="M30,85 L15,85 L15,70" class="crosshair-bracket"/>
+        </svg>
+        <div class="crosshair-lock-indicator" id="lock-indicator">LOCKED</div>
+    </div>
+    
+    <!-- Gesture Indicator -->
+    <div class="gesture-indicator" id="gesture-indicator">
+        <div class="gesture-hand">
+            <svg viewBox="0 0 60 60" class="hand-svg">
+                <path class="hand-path" d="M30,55 L30,35 M30,35 L20,20 M30,35 L25,18 M30,35 L30,15 M30,35 L35,18 M30,35 L40,22"/>
+            </svg>
+        </div>
+        <div class="gesture-info">
+            <div class="gesture-status" id="gesture-status">等待手势</div>
+            <div class="gesture-hint" id="gesture-hint">请做出手枪手势</div>
+        </div>
+        <div class="gesture-power">
+            <div class="power-bar" id="power-bar"></div>
+        </div>
+    </div>
+    
+    <!-- Hit Streak Display -->
+    <div class="hit-streak" id="hit-streak">
+        <span class="streak-count" id="streak-count">0</span>
+        <span class="streak-label">连击</span>
+    </div>
+    
+    <!-- Corner Decorations -->
+    <div class="corner-decor top-left">
+        <svg viewBox="0 0 100 100">
+            <path d="M0,40 L0,0 L40,0" fill="none" stroke="currentColor" stroke-width="2"/>
+            <circle cx="5" cy="5" r="3" fill="currentColor"/>
+        </svg>
+    </div>
+    <div class="corner-decor top-right">
+        <svg viewBox="0 0 100 100">
+            <path d="M60,0 L100,0 L100,40" fill="none" stroke="currentColor" stroke-width="2"/>
+            <circle cx="95" cy="5" r="3" fill="currentColor"/>
+        </svg>
+    </div>
+    <div class="corner-decor bottom-left">
+        <svg viewBox="0 0 100 100">
+            <path d="M0,60 L0,100 L40,100" fill="none" stroke="currentColor" stroke-width="2"/>
+            <circle cx="5" cy="95" r="3" fill="currentColor"/>
+        </svg>
+    </div>
+    <div class="corner-decor bottom-right">
+        <svg viewBox="0 0 100 100">
+            <path d="M100,60 L100,100 L60,100" fill="none" stroke="currentColor" stroke-width="2"/>
+            <circle cx="95" cy="95" r="3" fill="currentColor"/>
+        </svg>
+    </div>
+    
+    <!-- Scan Lines Overlay -->
+    <div class="scan-lines"></div>
+    
+    <!-- Vignette -->
+    <div class="vignette"></div>
+
+    <!-- MediaPipe Scripts (non-module) -->
+    <script src="https://unpkg.com/@mediapipe/hands@0.4.1646424915/hands.js"></script>
+    <script src="https://unpkg.com/@mediapipe/camera_utils@0.3.1640029074/camera_utils.js"></script>
+    
+    <!-- Main Module -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

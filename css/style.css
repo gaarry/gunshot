@@ -1,0 +1,799 @@
+/* ==================== Variables ==================== */
+:root {
+    --primary: #00f5ff;
+    --primary-dim: rgba(0, 245, 255, 0.5);
+    --secondary: #ff00ff;
+    --secondary-dim: rgba(255, 0, 255, 0.5);
+    --accent: #ff0066;
+    --success: #00ff88;
+    --warning: #ffaa00;
+    --danger: #ff3366;
+    --bg-dark: #0a0a1a;
+    --bg-darker: #050510;
+    --text: #ffffff;
+    --text-dim: rgba(255, 255, 255, 0.6);
+    --glass: rgba(10, 10, 30, 0.8);
+    --glass-border: rgba(0, 245, 255, 0.2);
+    
+    --font-display: 'Orbitron', monospace;
+    --font-body: 'Rajdhani', sans-serif;
+}
+
+/* ==================== Reset ==================== */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    overflow: hidden;
+    background: var(--bg-dark);
+    font-family: var(--font-body);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==================== Loading Screen ==================== */
+#loading-screen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, var(--bg-dark) 0%, #1a0a2e 50%, #0a1a2e 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+#loading-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.loading-logo {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin-bottom: 2rem;
+}
+
+.logo-ring {
+    position: absolute;
+    inset: 0;
+    border: 2px solid transparent;
+    border-radius: 50%;
+}
+
+.logo-ring:nth-child(1) {
+    border-top-color: var(--primary);
+    animation: spin 2s linear infinite;
+}
+
+.logo-ring:nth-child(2) {
+    inset: 15px;
+    border-right-color: var(--secondary);
+    animation: spin 1.5s linear infinite reverse;
+}
+
+.logo-ring:nth-child(3) {
+    inset: 30px;
+    border-bottom-color: var(--accent);
+    animation: spin 1s linear infinite;
+}
+
+.logo-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--primary);
+    text-shadow: 0 0 20px var(--primary);
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 5vw, 3rem);
+    font-weight: 900;
+    background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientFlow 3s linear infinite;
+    letter-spacing: 0.3rem;
+}
+
+.loading-subtitle {
+    font-size: 1rem;
+    color: var(--text-dim);
+    margin-top: 0.5rem;
+    letter-spacing: 0.5rem;
+}
+
+@keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+.loading-container {
+    width: min(300px, 80vw);
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    margin-top: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.loading-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    width: 0%;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 2px;
+    position: relative;
+}
+
+.loading-glow {
+    position: absolute;
+    top: -10px;
+    left: 0;
+    width: 100%;
+    height: 24px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    opacity: 0.3;
+    animation: glowMove 2s linear infinite;
+}
+
+@keyframes glowMove {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.loading-text {
+    color: var(--primary);
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    letter-spacing: 0.2rem;
+    font-family: var(--font-display);
+}
+
+.loading-steps {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.step {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.step.active {
+    color: var(--primary);
+}
+
+.step.done {
+    color: var(--success);
+}
+
+.step-icon {
+    font-size: 0.6rem;
+    transition: transform 0.3s ease;
+}
+
+.step.active .step-icon {
+    animation: pulse 0.5s ease infinite;
+}
+
+.step.done .step-icon::before {
+    content: '◆';
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+}
+
+.loading-hint {
+    margin-top: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    opacity: 0.7;
+}
+
+.hint-item {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+/* ==================== Video & Canvas ==================== */
+#video {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+    z-index: 1;
+}
+
+#skeleton-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+#game-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* ==================== Debug Panel ==================== */
+.debug-panel {
+    position: fixed;
+    top: 100px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    z-index: 500;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    backdrop-filter: blur(10px);
+    min-width: 180px;
+}
+
+.debug-title {
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    color: var(--primary);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--glass-border);
+    letter-spacing: 0.1rem;
+}
+
+.debug-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 6px 0;
+    gap: 10px;
+}
+
+.debug-label {
+    color: var(--text-dim);
+}
+
+.debug-value {
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+}
+
+.debug-value.success {
+    color: var(--success);
+}
+
+.debug-value.error {
+    color: var(--danger);
+}
+
+/* ==================== HUD Panels ==================== */
+.hud {
+    position: fixed;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.hud-top-left {
+    top: 20px;
+    left: 20px;
+}
+
+.hud-top-right {
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.panel {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 12px 20px;
+    position: relative;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
+}
+
+.panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+}
+
+.panel::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--secondary-dim), transparent);
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.3rem;
+}
+
+.panel-icon {
+    color: var(--primary);
+    font-size: 0.7rem;
+}
+
+.panel-title {
+    font-family: var(--font-display);
+    font-size: 0.65rem;
+    color: var(--primary);
+    letter-spacing: 0.2rem;
+}
+
+.panel-value {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text);
+    text-shadow: 0 0 10px var(--primary);
+    transition: transform 0.1s ease;
+}
+
+.panel-value.pop {
+    transform: scale(1.2);
+}
+
+.combo-panel .panel-value {
+    color: var(--secondary);
+    text-shadow: 0 0 10px var(--secondary);
+}
+
+.accuracy-panel .panel-value {
+    font-size: 1.2rem;
+}
+
+/* ==================== Crosshair ==================== */
+.crosshair {
+    position: fixed;
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 200;
+    transform: translate(-50%, -50%);
+    transition: width 0.15s ease, height 0.15s ease;
+}
+
+.crosshair.locked {
+    width: 70px;
+    height: 70px;
+}
+
+.crosshair-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.crosshair-ring-outer {
+    fill: none;
+    stroke: var(--primary);
+    stroke-width: 1;
+    opacity: 0.5;
+    animation: rotateRing 4s linear infinite;
+    transform-origin: center;
+}
+
+.crosshair-ring-inner {
+    fill: none;
+    stroke: var(--primary);
+    stroke-width: 2;
+    stroke-dasharray: 10 5;
+    animation: rotateRing 3s linear infinite reverse;
+    transform-origin: center;
+}
+
+.crosshair.locked .crosshair-ring-outer,
+.crosshair.locked .crosshair-ring-inner {
+    stroke: var(--accent);
+}
+
+@keyframes rotateRing {
+    to { transform: rotate(360deg); }
+}
+
+.crosshair-dot {
+    fill: var(--primary);
+    filter: drop-shadow(0 0 5px var(--primary));
+}
+
+.crosshair.locked .crosshair-dot {
+    fill: var(--accent);
+    filter: drop-shadow(0 0 8px var(--accent));
+    animation: pulseDot 0.3s ease infinite;
+}
+
+@keyframes pulseDot {
+    0%, 100% { r: 3; }
+    50% { r: 5; }
+}
+
+.crosshair-line {
+    stroke: var(--primary);
+    stroke-width: 2;
+    filter: drop-shadow(0 0 3px var(--primary));
+}
+
+.crosshair.locked .crosshair-line {
+    stroke: var(--accent);
+    filter: drop-shadow(0 0 5px var(--accent));
+}
+
+.crosshair-bracket {
+    fill: none;
+    stroke: var(--primary);
+    stroke-width: 2;
+    opacity: 0.7;
+    transition: all 0.15s ease;
+}
+
+.crosshair.locked .crosshair-bracket {
+    stroke: var(--accent);
+    opacity: 1;
+}
+
+.crosshair-lock-indicator {
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-display);
+    font-size: 0.6rem;
+    color: var(--accent);
+    letter-spacing: 0.2rem;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    text-shadow: 0 0 10px var(--accent);
+}
+
+.crosshair.locked .crosshair-lock-indicator {
+    opacity: 1;
+}
+
+/* ==================== Gesture Indicator ==================== */
+.gesture-indicator {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--glass);
+    padding: 12px 24px;
+    border: 1px solid var(--glass-border);
+    border-radius: 50px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 100;
+}
+
+.gesture-hand {
+    width: 40px;
+    height: 40px;
+}
+
+.hand-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.hand-path {
+    fill: none;
+    stroke: var(--text-dim);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 0.3s ease;
+}
+
+.gesture-indicator.active .hand-path {
+    stroke: var(--primary);
+    filter: drop-shadow(0 0 5px var(--primary));
+}
+
+.gesture-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.gesture-status {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    color: var(--text);
+    letter-spacing: 0.1rem;
+}
+
+.gesture-hint {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+}
+
+.gesture-power {
+    width: 60px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.power-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    transition: width 0.2s ease;
+    border-radius: 3px;
+}
+
+/* ==================== Hit Streak ==================== */
+.hit-streak {
+    position: fixed;
+    top: 50%;
+    right: 30px;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 100;
+}
+
+.hit-streak.visible {
+    opacity: 1;
+}
+
+.streak-count {
+    font-family: var(--font-display);
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--warning);
+    text-shadow: 0 0 30px var(--warning);
+    line-height: 1;
+}
+
+.streak-label {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    color: var(--warning);
+    letter-spacing: 0.3rem;
+}
+
+/* ==================== Float Text Effects ==================== */
+.float-text {
+    position: fixed;
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    font-weight: 900;
+    pointer-events: none;
+    z-index: 300;
+    animation: floatUp 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.float-text.hit {
+    color: var(--success);
+    text-shadow: 0 0 20px var(--success), 0 0 40px var(--success);
+}
+
+.float-text.miss {
+    color: var(--danger);
+    text-shadow: 0 0 20px var(--danger);
+}
+
+.float-text.perfect {
+    color: var(--warning);
+    text-shadow: 0 0 30px var(--warning), 0 0 60px var(--warning);
+    font-size: 3rem;
+}
+
+@keyframes floatUp {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(0.5);
+    }
+    30% {
+        opacity: 1;
+        transform: translate(-50%, -20px) scale(1.3);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -100px) scale(1);
+    }
+}
+
+/* ==================== Muzzle Flash ==================== */
+.muzzle-flash {
+    position: fixed;
+    width: 150px;
+    height: 150px;
+    pointer-events: none;
+    z-index: 250;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255, 220, 100, 0.9) 0%, rgba(255, 150, 50, 0.5) 30%, rgba(255, 100, 50, 0.2) 50%, transparent 70%);
+    animation: flashOut 0.15s ease-out forwards;
+}
+
+@keyframes flashOut {
+    0% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(0.3) rotate(0deg); 
+    }
+    50% {
+        opacity: 0.8;
+        transform: translate(-50%, -50%) scale(1) rotate(90deg);
+    }
+    100% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) scale(1.5) rotate(180deg); 
+    }
+}
+
+/* ==================== Screen Flash ==================== */
+.screen-flash {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at var(--flash-x, 50%) var(--flash-y, 50%), rgba(255, 255, 255, 0.15) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 150;
+    animation: screenFlash 0.15s ease-out forwards;
+}
+
+@keyframes screenFlash {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* ==================== Corner Decorations ==================== */
+.corner-decor {
+    position: fixed;
+    width: 80px;
+    height: 80px;
+    color: var(--primary-dim);
+    pointer-events: none;
+    z-index: 50;
+}
+
+.corner-decor.top-left { top: 10px; left: 10px; }
+.corner-decor.top-right { top: 10px; right: 10px; transform: scaleX(-1); }
+.corner-decor.bottom-left { bottom: 10px; left: 10px; transform: scaleY(-1); }
+.corner-decor.bottom-right { bottom: 10px; right: 10px; transform: scale(-1); }
+
+.corner-decor svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* ==================== Scan Lines ==================== */
+.scan-lines {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 60;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+    );
+}
+
+/* ==================== Vignette ==================== */
+.vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 55;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.4) 100%);
+}
+
+/* ==================== Responsive ==================== */
+@media (max-width: 768px) {
+    .loading-title {
+        letter-spacing: 0.15rem;
+    }
+    
+    .loading-steps {
+        gap: 1rem;
+    }
+    
+    .panel {
+        padding: 8px 14px;
+    }
+    
+    .panel-value {
+        font-size: 1.4rem;
+    }
+    
+    .crosshair {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .gesture-indicator {
+        padding: 10px 18px;
+        gap: 0.8rem;
+    }
+    
+    .streak-count {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hud-top-left, .hud-top-right {
+        top: 10px;
+    }
+    
+    .hud-top-left {
+        left: 10px;
+    }
+    
+    .hud-top-right {
+        right: 10px;
+    }
+    
+    .gesture-indicator {
+        bottom: 15px;
+    }
+}
+
